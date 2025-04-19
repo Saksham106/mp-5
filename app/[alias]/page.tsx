@@ -1,12 +1,8 @@
 import getUrl from "@/lib/getUrl";
 import { redirect } from "next/navigation";
 
-export default async function AliasRedirect({ 
-  params 
-}: { 
-  params: { alias: string } 
-}) {
-  const { alias } = params;
+export default async function AliasRedirect({ params, }: { params: Promise<{ alias: string }>; }) {
+  const { alias } = await params;
   if (!alias) {
     return redirect("/");
   }
