@@ -263,7 +263,6 @@ export default function Form() {
   const [shortenedUrl, setShortenedUrl] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   
-  // Set the origin only on the client side after component mounts
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
