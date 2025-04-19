@@ -1,259 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styled from "styled-components";
 import createUrl from "@/lib/createUrl";
 import { Url } from "@/types";
-
-const FormContainer = styled.div`
-  max-width: 680px;
-  margin: 1.75rem auto;
-  padding: 0.5rem 1.5rem;
-  font-family: var(--font-sans, system-ui, sans-serif);
-`;
-
-const FormElement = styled.form`
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    background: linear-gradient(to bottom, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.8));
-    border: 1px solid rgba(71, 85, 105, 0.3);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  }
-`;
-
-const FormTitle = styled.h2`
-  font-size: 1.85rem;
-  margin-bottom: 1.75rem;
-  font-weight: 700;
-  text-align: center;
-  color: #f1f5f9;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  
-  @media (prefers-color-scheme: light) {
-    color: #1e293b;
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: none;
-  }
-`;
-
-const FormSection = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const InputLabel = styled.label`
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #f1f5f9;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.02em;
-  display: flex;
-  align-items: center;
-  
-  @media (prefers-color-scheme: light) {
-    color: #1e293b;
-  }
-`;
-
-const TextInput = styled.input`
-  padding: 0.75rem 1rem;
-  border: 1px solid #c0c7d0;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  background-color: #fff;
-  color: #333;
-  font-weight: 500;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
-
-  &::placeholder {
-    color: #94a3b8;
-    opacity: 0.8;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-  }
-`;
-
-const AliasWrapper = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const DomainPrefix = styled.span`
-  color: #e2e8f0;
-  font-size: 0.95rem;
-  white-space: nowrap;
-  padding-right: 0.5rem;
-  font-weight: 500;
-  
-  @media (prefers-color-scheme: light) {
-    color: #334155;
-  }
-`;
-
-const HelpText = styled.p`
-  font-size: 0.8rem;
-  color: #cbd5e1;
-  margin-top: 0.5rem;
-  font-style: italic;
-  
-  @media (prefers-color-scheme: light) {
-    color: #64748b;
-  }
-`;
-
-const ActionButton = styled.button`
-  background-color: var(--accent);
-  color: white;
-  padding: 0.9rem 1.5rem;
-  font-weight: 500;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 0.5rem;
-  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
-
-  &:hover {
-    background-color: var(--accent-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px rgba(79, 70, 229, 0.25);
-  }
-
-  &:disabled {
-    background-color: var(--accent-light);
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-const ErrorBox = styled.div`
-  background-color: rgba(254, 226, 226, 0.9);
-  color: #b91c1c;
-  padding: 1rem;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  margin-top: 1rem;
-  text-align: center;
-  border: 1px solid rgba(252, 165, 165, 0.8);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
-  font-weight: 500;
-  
-  @media (prefers-color-scheme: dark) {
-    background-color: rgba(127, 29, 29, 0.5);
-    color: #fca5a5;
-    border: 1px solid rgba(252, 165, 165, 0.3);
-  }
-`;
-
-const ResultBox = styled.div`
-  background-color: #ecfdf5;
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  border-radius: 16px;
-  border: 1px solid #a7f3d0;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  
-  @media (prefers-color-scheme: dark) {
-    background: linear-gradient(to bottom, rgba(6, 95, 70, 0.4), rgba(6, 78, 59, 0.3));
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  }
-`;
-
-const ResultHeading = styled.p`
-  font-weight: 700;
-  color: #059669;
-  margin-bottom: 1.25rem;
-  font-size: 1.2rem;
-  letter-spacing: 0.01em;
-  
-  @media (prefers-color-scheme: dark) {
-    color: #34d399;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  }
-`;
-
-const LinkDisplay = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: white;
-  padding: 0.85rem 1.2rem;
-  border-radius: 10px;
-  border: 1px solid #d1fae5;
-  
-  @media (prefers-color-scheme: dark) {
-    background-color: rgba(15, 23, 42, 0.5);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-  }
-`;
-
-const ShortLink = styled.a`
-  color: var(--accent);
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 600;
-  font-size: 1.05rem;
-  
-  @media (prefers-color-scheme: dark) {
-    color: #93c5fd;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    
-    &:hover {
-      color: #bfdbfe;
-    }
-  }
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const CopyButton = styled.button`
-  background-color: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-weight: 500;
-
-  &:hover {
-    background-color: var(--accent-dark);
-    transform: translateY(-1px);
-  }
-`;
 
 export default function Form() {
   const [longUrl, setLongUrl] = useState("");
@@ -299,13 +48,31 @@ export default function Form() {
   };
 
   return (
-    <FormContainer>
-      <FormElement onSubmit={handleSubmit}>
-        <FormTitle>Create Your Shortened URL</FormTitle>
+    <div className="max-w-[680px] mx-auto my-7 px-6 font-sans">
+      <form 
+        onSubmit={handleSubmit}
+        className="bg-white/80 dark:bg-gradient-to-b dark:from-slate-800/90 dark:to-slate-900/80 
+                  rounded-2xl shadow-lg p-8 flex flex-col gap-5 backdrop-blur-md
+                  border border-[var(--border)] transition-all duration-200 
+                  hover:-translate-y-0.5 hover:shadow-xl"
+      >
+        <h2 className="text-[1.85rem] mb-7 font-bold text-center
+                      text-slate-100 dark:text-slate-100 shadow-sm
+                      dark:text-shadow bg-gradient-to-r from-slate-800 to-slate-600
+                      bg-clip-text text-transparent dark:text-slate-100">
+          Create Your Shortened URL
+        </h2>
 
-        <FormSection>
-          <InputLabel htmlFor="longUrl">Original URL</InputLabel>
-          <TextInput
+        <div className="flex flex-col">
+          <label 
+            htmlFor="longUrl" 
+            className="text-base font-semibold mb-2 text-slate-100 dark:text-slate-100
+                      tracking-wide flex items-center dark:text-shadow
+                      text-slate-800 dark:text-slate-100"
+          >
+            Original URL
+          </label>
+          <input
             id="longUrl"
             type="url"
             value={longUrl}
@@ -313,55 +80,100 @@ export default function Form() {
             placeholder="https://example.com/verylongpathtopage"
             required
             disabled={isSubmitting}
+            className="py-3 px-4 border border-slate-300 rounded-lg text-[0.95rem]
+                      transition-all duration-200 bg-white text-slate-800 font-medium
+                      shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)] placeholder:text-slate-400/80
+                      focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-200"
           />
-        </FormSection>
+        </div>
         
-        <FormSection>
-          <InputLabel htmlFor="customAlias">Custom Alias (Optional)</InputLabel>
-          <AliasWrapper>
-            <DomainPrefix>{origin}/</DomainPrefix>
-            <TextInput
+        <div className="flex flex-col">
+          <label 
+            htmlFor="customAlias" 
+            className="text-base font-semibold mb-2 text-slate-100 dark:text-slate-100
+                      tracking-wide flex items-center dark:text-shadow
+                      text-slate-800 dark:text-slate-100"
+          >
+            Custom Alias (Optional)
+          </label>
+          <div className="flex items-center">
+            <span className="text-[0.95rem] text-slate-200 dark:text-slate-200 whitespace-nowrap pr-2 font-medium
+                        text-slate-700 dark:text-slate-200">
+              {origin}/
+            </span>
+            <input
               id="customAlias"
               type="text"
               value={customAlias}
               onChange={(e) => setCustomAlias(e.target.value)}
               placeholder="my-custom-alias"
               disabled={isSubmitting}
+              className="py-3 px-4 border border-slate-300 rounded-lg text-[0.95rem] w-full
+                        transition-all duration-200 bg-white text-slate-800 font-medium
+                        shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)] placeholder:text-slate-400/80
+                        focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-200"
             />
-          </AliasWrapper>
-          <HelpText>Leave empty for a randomly generated alias</HelpText>
-        </FormSection>
+          </div>
+          <p className="text-[0.8rem] text-slate-300 dark:text-slate-300 mt-2 italic
+                      text-slate-500 dark:text-slate-300">
+            Leave empty for a randomly generated alias
+          </p>
+        </div>
 
-        <ActionButton 
+        <button 
           type="submit" 
           disabled={isSubmitting || !longUrl}
+          className="bg-[var(--accent)] text-white py-[0.9rem] px-6 font-medium
+                    border-none rounded-[10px] text-base cursor-pointer transition-all duration-200
+                    mt-2 shadow-md shadow-indigo-200/20 disabled:bg-[var(--accent-light)]
+                    disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none
+                    hover:bg-[var(--accent-dark)] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-200/25"
         >
           {isSubmitting ? "Processing..." : "Generate Short URL"}
-        </ActionButton>
-      </FormElement>
+        </button>
+      </form>
 
-      {error && <ErrorBox>{error}</ErrorBox>}
+      {error && (
+        <div className="bg-red-100/90 dark:bg-red-900/50 text-red-700 dark:text-red-300 p-4
+                      rounded-xl text-[0.95rem] mt-4 text-center border dark:border-red-300/30
+                      border-red-200/80 shadow-lg shadow-red-200/15 font-medium">
+          {error}
+        </div>
+      )}
 
       {shortenedUrl && (
-        <ResultBox>
-          <ResultHeading>Your shortened URL is ready!</ResultHeading>
-          <LinkDisplay>
-            <ShortLink 
+        <div className="bg-emerald-50 dark:bg-gradient-to-b dark:from-emerald-900/40 dark:to-emerald-950/30
+                      mt-6 p-6 rounded-2xl border border-emerald-200 dark:border-emerald-600/40
+                      shadow-lg shadow-emerald-100/8 dark:shadow-black/15">
+          <p className="font-bold text-emerald-700 dark:text-emerald-400 mb-5 text-lg tracking-tight
+                       dark:text-shadow">
+            Your shortened URL is ready!
+          </p>
+          <div className="flex justify-between items-center bg-white dark:bg-slate-900/50 py-3.5 px-5
+                        rounded-[10px] border border-emerald-100 dark:border-emerald-600/40
+                        dark:shadow-md dark:shadow-black/15 dark:shadow-inner dark:from-white/5">
+            <a 
               href={`${origin}/${shortenedUrl}`}
               target="_blank"
               rel="noopener noreferrer"
+              className="text-[var(--accent)] dark:text-blue-300 no-underline overflow-hidden
+                        text-ellipsis font-semibold text-[1.05rem] dark:text-shadow
+                        hover:underline dark:hover:text-blue-200"
             >
               {`${origin}/${shortenedUrl}`}
-            </ShortLink>
-            <CopyButton 
+            </a>
+            <button 
               onClick={handleCopyToClipboard}
               type="button"
+              className="bg-[var(--accent)] text-white border-none rounded-lg py-2.5 px-4
+                        text-sm cursor-pointer transition-all duration-150 font-medium
+                        hover:bg-[var(--accent-dark)] hover:-translate-y-0.5"
             >
               Copy URL
-            </CopyButton>
-          </LinkDisplay>
-        </ResultBox>
+            </button>
+          </div>
+        </div>
       )}
-    </FormContainer>
+    </div>
   );
 }
