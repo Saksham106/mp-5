@@ -9,16 +9,9 @@ export default async function createUrl(
   console.log("creating new url");
   
   try {
-    new URL(urlBefore);
-  } catch (error) {
-    return "Invalid link format";
-  }
-  
-  try {
     const response = await fetch(urlBefore, { 
       method: "HEAD", 
       redirect: "follow",
-      // Set a reasonable timeout
       signal: AbortSignal.timeout(5000)
     });
     
@@ -35,7 +28,7 @@ export default async function createUrl(
     urlAfter: customAlias,
   };
 
-  // insert in DB
+
   const urlsCollection = await getCollection(URL_COLLECTION);
   const duplicateAlias = await urlsCollection.findOne({ urlAfter: customAlias });
     if (duplicateAlias) {
