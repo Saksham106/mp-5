@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import createUrl from "@/lib/createUrl";
 import { Url } from "@/types";
@@ -261,6 +261,12 @@ export default function Form() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shortenedUrl, setShortenedUrl] = useState<string | null>(null);
+  const [origin, setOrigin] = useState("");
+  
+  // Set the origin only on the client side after component mounts
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -286,8 +292,8 @@ export default function Form() {
   };
 
   const handleCopyToClipboard = () => {
-    if (shortenedUrl) {
-      const fullUrl = `${window.location.origin}/${shortenedUrl}`;
+    if (shortenedUrl && origin) {
+      const fullUrl = `${origin}/${shortenedUrl}`;
       navigator.clipboard.writeText(fullUrl);
       alert("URL copied to clipboard!");
     }
@@ -305,7 +311,7 @@ export default function Form() {
             type="url"
             value={longUrl}
             onChange={(e) => setLongUrl(e.target.value)}
-            placeholder="https://example.com/very/long/path/to/page"
+            placeholder="https://example.com/verylongpathtopage"
             required
             disabled={isSubmitting}
           />
@@ -314,7 +320,7 @@ export default function Form() {
         <FormSection>
           <InputLabel htmlFor="customAlias">Custom Alias (Optional)</InputLabel>
           <AliasWrapper>
-            <DomainPrefix>{window.location.origin}/</DomainPrefix>
+            <DomainPrefix>{origin}/</DomainPrefix>
             <TextInput
               id="customAlias"
               type="text"
@@ -342,11 +348,11 @@ export default function Form() {
           <ResultHeading>Your shortened URL is ready!</ResultHeading>
           <LinkDisplay>
             <ShortLink 
-              href={`${window.location.origin}/${shortenedUrl}`}
+              href={`${origin}/${shortenedUrl}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {`${window.location.origin}/${shortenedUrl}`}
+              {`${origin}/${shortenedUrl}`}
             </ShortLink>
             <CopyButton 
               onClick={handleCopyToClipboard}
