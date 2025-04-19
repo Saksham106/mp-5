@@ -6,7 +6,7 @@ export default async function AliasRedirect({
 }: { 
   params: { alias: string } 
 }) {
-  const { alias } = params;
+  const { alias } = await params;
   if (!alias) {
     return redirect("/");
   }
